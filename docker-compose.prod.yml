@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: famitum-api
+    build:
+      context: ./famitum-api
+    expose:
+      - "8080"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    restart: always
+    networks:
+      - famitum_net
+
+  db:
+    container_name: famitum-db
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: famitum_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: famitum_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - famitum_net
+
+  migrate:
+    container_name: famitum-migrate
+    build:
+      context: ./famitum-api
+      dockerfile: Dockerfile.migrate
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      db:
+        condition: service_started
+    networks:
+      - famitum_net
+
+  frontend:
+    container_name: famitum-front
+    build:
+      context: ./famitum-front
+    expose:
+      - "3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: https://api.famitum.com/v1
+    restart: always
+    networks:
+      - famitum_net
+
+volumes:
+  pgdata:
+
+networks:
+  famitum_net:
+    driver: bridge

@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: famitum-api
+    build:
+      context: ../famitum-api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_USER: user
+      DB_PASSWORD: pass
+      DB_NAME: famitum_db
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - famitum_local_net
+
+  db:
+    container_name: famitum-db
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: famitum_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - famitum_local_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    container_name: famitum-front
+    build:
+      context: ../famitum-front
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_BASE_URL: http://famitum-api:8080/v1
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - famitum_local_net
+
+volumes:
+  pgdata:
+
+networks:
+  famitum_local_net:
