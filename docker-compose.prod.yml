@@ -38,6 +38,8 @@ services:
         condition: service_started
     networks:
       - famitum_net
+    restart: "no"
+
 
   frontend:
     container_name: famitum-front
