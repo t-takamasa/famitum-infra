@@ -29,19 +29,19 @@ services:
     networks:
       - famitum_net
 
-  migrate:
-    container_name: famitum-migrate
-    build:
-      context: ../famitum-api
-      dockerfile: Dockerfile.migrate
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-    depends_on:
-      db:
-        condition: service_started
-    restart: "no"
-    networks:
-      - famitum_net
+  # migrate:
+  #   container_name: famitum-migrate
+  #   build:
+  #     context: ../famitum-api
+  #     dockerfile: Dockerfile.migrate
+  #   environment:
+  #     DATABASE_URL: ${DATABASE_URL}
+  #   depends_on:
+  #     db:
+  #       condition: service_started
+  #   restart: "no"
+  #   networks:
+  #     - famitum_net
 
   frontend:
     container_name: famitum-front
