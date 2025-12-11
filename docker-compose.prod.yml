@@ -4,12 +4,15 @@ services:
   api:
     container_name: famitum-api
     build:
-      context: ./famitum-api
+      context: ../famitum-api
     expose:
       - "8080"
     environment:
       DATABASE_URL: ${DATABASE_URL}
     restart: always
+    depends_on:
+      db:
+        condition: service_started
     networks:
       - famitum_net
 
@@ -29,28 +32,30 @@ services:
   migrate:
     container_name: famitum-migrate
     build:
-      context: ./famitum-api
+      context: ../famitum-api
       dockerfile: Dockerfile.migrate
     environment:
       DATABASE_URL: ${DATABASE_URL}
     depends_on:
       db:
         condition: service_started
+    restart: "no"
     networks:
       - famitum_net
-    restart: "no"
-
 
   frontend:
     container_name: famitum-front
     build:
-      context: ./famitum-front
+      context: ../famitum-front
     expose:
       - "3000"
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_BASE_URL: https://api.famitum.com/v1
     restart: always
+    depends_on:
+      api:
+        condition: service_started
     networks:
       - famitum_net
 
